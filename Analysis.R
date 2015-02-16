@@ -3,6 +3,7 @@ library(plyr)
 library(dplyr)
 library(zoo)
 library(XML)
+library(ggplot2)
 
 
 # Load data into R --------------------------------------------------------
@@ -44,6 +45,7 @@ rm(OzData_tmp)
 #so it stays the correct number, then change to numeric
 OzData$Sample.Value <- as.numeric(as.character(OzData$Sample.Value))
 
+
 #Create Year factor
 OzData$year<-factor(substr(as.character(OzData$Date),1,4))
 
@@ -79,7 +81,33 @@ OzData$CountyName <- factor(OzData$CountyName)
 
 # places <- xpathSApply(doc,"//h2",xmlValue)
 
+#Change Pike Data Units
+OzData$Sample.Value[OzData$Common.Name=="Pike"] <-OzData$Sample.Value[OzData$Common.Name=="Pike"]/1000
+
+#Remove Georgia DOT Data
+GDOTdata<-which(OzData$Common.Name=="Georgia DOT")
+OzData<-OzData[-GDOTdata,]
+
+#Remove 2 POC data
+POC2<-which(OzData$POC==2)
+OzData<-OzData[-POC2,]
+
+#Remove Winter Months
+nov<-which(OzData$month=="11")
+dec<-which(OzData$month=="12")
+jan<-which(OzData$month=="01")
+feb<-which(OzData$month=='02')
+
+
+OzData<-OzData[-jan,]
+OzData<-OzData[-feb,]
+OzData<-OzData[-nov,]
+OzData<-OzData[-dec,]
+
 #Remove a bunch of extra columns
+
+OzData$State.Code <- NULL
+OzData$Parameter <- NULL
 OzData$Uncertainty <- NULL
 OzData$Qualifier...2 <- NULL
 OzData$Qualifier...3 <- NULL
@@ -92,10 +120,43 @@ OzData$Qualifier...9 <- NULL
 OzData$Qualifier...10 <- NULL
 
 
-rm(fips,SiteLookup)
+rm(fips,SiteLookup,GDOTdata,POC2)
+
+#Create Data Frame with the daily maximum value
+OzMax<-ddply(OzData, .(Date,Common.Name),summarize,Sample.Max=max(Sample.Value,na.rm=TRUE),parallel=TRUE)
+
+# Use OzMax Date to get year and month
+OzMax$year <- factor(substr(as.character(OzMax$Date),1,4))
+OzMax$month <- factor(substr(as.character(OzMax$Date),5,6))
+
+#Calculate average by year
+OzYearMean <- ddply(OzMax,.(year,Common.Name),summarize, yearavg=mean(Sample.Max,na.rm=TRUE),
+                    perc10=quantile(Sample.Max,probs=.1,na.rm=TRUE),
+                    perc90=quantile(Sample.Max,probs=.9,na.rm=TRUE))
 
 
 
+#Plot Generation
+
+# Subdivide by place and year
+#YearSummary<-ddply(OzData, .(Common.Name,year),summarize, yearly.mean=mean(Sample.Value,na.rm=TRUE), 
+ #                  perc10=quantile(Sample.Value,probs=.1,na.rm=TRUE),
+  #                 perc90=quantile(Sample.Value,probs=.9,na.rm=TRUE))
+
+#YearSummary2<-ddply(OzData, .(year),summarize, yearly.mean=mean(Sample.Value,na.rm=TRUE),
+ #                   perc10=quantile(Sample.Value,probs=.1,na.rm=TRUE),
+  #                  perc90=quantile(Sample.Value,probs=.9,na.rm=TRUE))
+
+#Quick Plot Yearly Average and Yearly Average by Name
+s<-qplot(as.Date(year,format="%Y"),yearavg,data=OzYearMean, color=Common.Name, geom=c("line","point"),xlab="Year",
+      ylab="Ozone concentration (ppm)", main="Yearly trend in Georgia Ozone")
+
+plot(s)
+
+s2<-s+scale_y_continuous(limits=c(.02,.08),breaks=seq(.02,.1,.01))+geom_abline(intercept=.075,slope=0,linetype="dotdash")+
+      theme(panel.background=element_rect(fill="white"),panel.grid.major=element_line(color="gray"))
+
+plot(s2)
 
 
 
