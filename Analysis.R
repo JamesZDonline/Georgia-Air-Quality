@@ -149,15 +149,27 @@ OzYearMean <- ddply(OzMax,.(year,Common.Name),summarize, yearavg=mean(Sample.Max
 
 #Quick Plot Yearly Average and Yearly Average by Name
 s<-qplot(as.Date(year,format="%Y"),yearavg,data=OzYearMean, color=Common.Name, geom=c("line","point"),xlab="Year",
-      ylab="Ozone concentration (ppm)", main="Yearly trend in Georgia Ozone")
+      ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")
 
 plot(s)
 
-s2<-s+scale_y_continuous(limits=c(.02,.08),breaks=seq(.02,.1,.01))+geom_abline(intercept=.075,slope=0,linetype="dotdash")+
+s2<-s+scale_y_continuous(limits=c(.02,.08),breaks=seq(.02,.1,.01))+
+      geom_abline(intercept=.075,slope=0,linetype="dotdash")+
       theme(panel.background=element_rect(fill="white"),panel.grid.major=element_line(color="gray"))
 
 plot(s2)
+#p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=OzYearMean,stat="identity")
 
+AllYearMean <- ddply(OzMax,.(year),summarize, yearavg=mean(Sample.Max,na.rm=TRUE),
+                    perc10=quantile(Sample.Max,probs=.1,na.rm=TRUE),
+                    perc90=quantile(Sample.Max,probs=.9,na.rm=TRUE))
 
+p<-qplot(as.Date(year,format="%Y"),yearavg,data=AllYearMean, geom=c("line","point"),xlab="Year",
+         ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")
 
-   
+p2 <- p+scale_y_continuous(limits=c(.02,.09),breaks=seq(.02,.1,.01))+
+      geom_abline(intercept=.075,slope=0,linetype="dotdash")+
+      geom_smooth(aes(ymin=perc10,ymax=perc90),data=AllYearMean,stat="identity")+
+      theme(panel.background=element_rect(fill="white"),panel.grid.major=element_line(color="gray"))
+
+plot(p2)
