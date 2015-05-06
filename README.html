@@ -57,7 +57,14 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <p>Analysis and production of graphics to understand and display for the public trends in Georgia Air Quality over the last decade.</p>
 <div id="notes-about-the-data" class="section level3">
 <h3>Notes about the Data</h3>
-<p>Note that the Pike County Ozone Data is in different units. To convert to the same units. It is necessary to divide the Pike County Data by 1000.</p>
+<ul>
+<li><p>Note that the Pike County Ozone Data is in different units. To convert to the same units. It is necessary to divide the Pike County Data by 1000. This is because the Pike data was collected by EPA while the rest is EPD data.</p></li>
+<li><p>Georgia DOT data is only available for a few years. It can be discarded</p></li>
+<li><p>The months of November, December, January, and February are not a part of the official data set. They are collected as setup for the ozone year and should not be included as a part of the analysis because they will likely lower aggregations artificially.</p></li>
+<li><p>Any POC coded 2 are calibration data and can be discarded <strong>HOWEVER The GA Forestry Data is all marked as POC 2. So what do I do with that?</strong></p></li>
+</ul>
+<p>Ask Janet about Qualifiers and how mean is calculated</p>
+<p>Ask Susan about Macon W and Columbus CRLAB sites</p>
 </div>
 </div>
 

@@ -12,3 +12,13 @@ Site.ID,Common.Name
 132230003,Yorkville
 132319991,Pike
 132470001,Monastery
+131270006,Brunswick
+132130003,Ft Mtn
+130590002,Athens
+130210012,Macon Forestry
+132150008,Columbus AP
+130510021,Savannah E Pres
+130730001,Evans
+132450091,Bungalow
+130210013,Macon W
+132151003,Columbus CRLAB

@@ -1,9 +1,8 @@
 #Packages
-library(plyr)
-library(dplyr)
-library(zoo)
-library(XML)
-library(ggplot2)
+require(plyr)
+require(zoo)
+require(XML)
+require(ggplot2)
 
 
 # Load data into R --------------------------------------------------------
@@ -67,6 +66,7 @@ RCheaders<-c("X..RD","Action.Code","State.Code","County.Code","Site.ID","Paramet
 
 names(QDataRC)<-RCheaders
 
+
 #Create Date Variable for RC Data. I decided to set the day of the month to be the first for each month. I can change this later
 #if I find a need
 QDataRC$Date<-paste(QDataRC$Year,QDataRC$Month,"01",sep="")
@@ -84,16 +84,100 @@ QDataRC$ExtraColumn<-NULL
 QDataRC$Year<-NULL
 QDataRC$Month<-NULL
 
+#Function for combining together taken from https://amywhiteheadresearch.wordpress.com/2013/05/13/combining-dataframes-when-the-columns-dont-match/
 
+rbind.all.columns <- function(x, y) {
+   
+   x.diff <- setdiff(colnames(x), colnames(y))
+   y.diff <- setdiff(colnames(y), colnames(x))
+   
+   x[, c(as.character(y.diff))] <- NA
+   
+   y[, c(as.character(x.diff))] <- NA
+   
+   return(rbind(x, y))
+}
 
+#Recombine QData and QDataRC
 
+QData<-rbind.all.columns(QData,QDataRC)
+rm(QDataRC)
 #Remove a bunch of extra columns
-
+#Action code is I for all data. No need to keep this
 QData$Action.Code<-NULL
 
+#Uncertainty, AMDL, and thes qualifiers are NA for all data
+QData$Uncertainty<-NULL
+QData$Alternate.Method.Detectable.Limit<-NULL
+QData$Qualifier...10<-NULL
+QData$Qualifier...9<-NULL
+QData$Qualifier...8<-NULL
+QData$Qualifier...7<-NULL
+QData$Qualifier...6<-NULL
+QData$Qualifier...5<-NULL
+QData$Qualifier...4<-NULL
+QData$Qualifier...3<-NULL
+
+#Some of the data is of the wrong type, correct this
+QData$X..RD<-factor(QData$X..RD)
 QData$Parameter<-factor(QData$Parameter)
+QData$Sample.Value<-as.numeric(as.character(QData$Sample.Value))
 QData$POC<-factor(QData$POC)
 QData$Sample.Duration<-factor(QData$Sample.Duration)
 QData$Unit<-factor(QData$Unit)
 QData$Method<-factor(QData$Method)
+QData$Null.Data.Code<-factor(QData$Null.Data.Code)
 QData$Sampling.Frequency<-factor(QData$Sampling.Frequency)
+QData$Number.of.Samples<-factor(QData$Number.of.Samples)
+
+#Create Year factor
+QData$year<-factor(substr(as.character(QData$Date),1,4))
+
+#Create Month Factor
+QData$month<-factor(substr(as.character(QData$Date),5,6))
+
+#Paste together Date and hour to get DateTime and make it a POSIXct type
+QData$DateTime<-paste(QData$Date,QData$Start.Time,sep=":")
+QData$DateTime<-as.POSIXct(QData$DateTime,format="%Y%m%d:%R")
+
+#Paste together State.Code, County.Code, and Site.ID to create the full Site ID and save it as a factor back in Site ID
+QData$Site.ID<-factor(paste(QData$State.Code,QData$County.Code,QData$Site.ID,sep=""))
+QData$State.Code <- NULL
+
+#Create REadable county names
+fips<-read.csv("FIPS.csv",header=FALSE,colClasses=c("NULL","NULL","factor","factor","NULL"),
+               col.names=c("State","StateCode","CountyCode","CountyName","ClassCode"))
+
+# merging it with the Data
+QData<-merge(QData,fips,by.x="County.Code",by.y="CountyCode",all.x=TRUE)
+QData$CountyName <- factor(QData$CountyName)
+
+#Add Sitenames and Location type
+SiteLookup<-read.csv("Sites2.csv",sep=",",header=T)
+QData<-merge(QData,SiteLookup,by.x="Site.ID",by.y="Site.ID",all.x=TRUE)
+QData$MetroAtlanta<-gsub("no",QData$MetroAtlanta,ignore.case=T,replacement="State")
+QData$MetroAtlanta<-gsub("yes",QData$MetroAtlanta,ignore.case=T,replacement="Metro-Atlanta")
+save(QData,file="CleanedQData.RData")
+
+#Create separate files for each criteria pollutant
+#Lead has two parameter codes '12128' and '14129' Extract them both and save in LeadData
+Lead<-QData[which(QData$Parameter=='12128'|QData$Parameter=='14129'),]
+save(Lead,file="LeadData.RData")
+
+PM2.5<-QData[which(QData$Parameter=='88101'),]
+save(PM2.5,file="PM25.RData")
+
+SO2<-QData[which(QData$Parameter=='42401'),]
+save(SO2,file="SO2.RData")
+
+NO2<-QData[which(QData$Parameter=='42602'),]
+save(NO2,file="NO2.RData")
+
+O3<-QData[which(QData$Parameter=='44201'),]
+save(O3,file="O3.RData")
+
+rm(QData)
+
+#Run analysis for each criteria
+source("O3Analysis.R")
+
