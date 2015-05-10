@@ -106,7 +106,7 @@ rm(QDataRC)
 #Action code is I for all data. No need to keep this
 QData$Action.Code<-NULL
 
-#Uncertainty, AMDL, and thes qualifiers are NA for all data
+#Uncertainty, AMDL, and these qualifiers are NA for all data
 QData$Uncertainty<-NULL
 QData$Alternate.Method.Detectable.Limit<-NULL
 QData$Qualifier...10<-NULL
@@ -144,7 +144,7 @@ QData$DateTime<-as.POSIXct(QData$DateTime,format="%Y%m%d:%R")
 QData$Site.ID<-factor(paste(QData$State.Code,QData$County.Code,QData$Site.ID,sep=""))
 QData$State.Code <- NULL
 
-#Create REadable county names
+#Create Readable county names
 fips<-read.csv("FIPS.csv",header=FALSE,colClasses=c("NULL","NULL","factor","factor","NULL"),
                col.names=c("State","StateCode","CountyCode","CountyName","ClassCode"))
 
