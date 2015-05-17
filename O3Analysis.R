@@ -56,7 +56,7 @@ O3Standard<-ddply(O3DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard
 
 AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE))
 
-s<-qplot(as.Date(year,format="%Y"),standard,data=O3Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
+s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=O3Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
          ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Georgia Ozone")
 plot(s)
 s2<-s+scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+

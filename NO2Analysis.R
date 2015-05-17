@@ -4,7 +4,8 @@ NO2$Site.ID<-factor(NO2$Site.ID)
 NO2$Sample.Duration<-factor(NO2$Sample.Duration)
 NO2$Start.Time<-factor(NO2$Start.Time)
 
-#Remove Name==""
+#Remove Roadside site (Name=="")
+NO2<-NO2[-which(NO2$Common.Name==""),]
 
 #Fix an issue with units
 NO2$Sample.Value[NO2$Unit=="007"] <-NO2$Sample.Value[NO2$Unit=="007"]*1000
@@ -14,7 +15,7 @@ NO2DailyMax$year<-factor(substr(as.character(NO2DailyMax$Date),1,4))
 
 NO2Standard<-ddply(NO2DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard=quantile(Daily.Max,.98))
 
-s<-qplot(as.Date(year,format="%Y"),standard,data=NO2Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
+s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=NO2Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
          ylab="NO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia NO2")
 plot(s)
 s2<-s+geom_abline(intercept=100,slope=0,linetype="dotdash")+
