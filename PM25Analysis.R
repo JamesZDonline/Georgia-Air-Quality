@@ -14,14 +14,17 @@ PM2.5Yearly<-ddply(PM2.5DailyMax,.(year,Common.Name,MetroAtlanta),summarize,Year
 
 f3<-rep(1/3,3)
 
-PM2.5Standard<-ddply(PM2.5Yearly,.(year,Common.Name,MetroAtlanta),summarize,standard=filter(Yearly,f3,sides=1))
+PM2.5Yearly<-PM2.5Yearly[-which(PM2.5Yearly$Common.Name=="University of Georgia"),]
 
+PM2.5Standard<-ddply(PM2.5Yearly,.(Common.Name),transform,standard=as.numeric(filter(Yearly,f3,sides=1)))
+
+PM2.5Standard<-PM2.5Standard[complete.cases(PM2.5Standard),]
 
 s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=PM2.5Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab="PM2.5 Concentration (μg/m^3) Standard", main="Yearly Trend in Georgia PM2.5")
+         ylab=bquote("PM2.5 Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia PM2.5")
 plot(s)
 s2<-s+geom_abline(intercept=35,slope=0,linetype="dotdash")+
-   scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
+   scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
    theme(panel.background=element_rect(fill="white"))
 plot(s2)
 
