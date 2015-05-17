@@ -1,17 +1,17 @@
 Site.ID,Common.Name,MetroAtlanta
-130090001,Baldwin  Co Airport,No
-130150002,HWY 113,yes
+130090001,Baldwin Co Airport,No
+130150002,Stilesboro,yes
 130210007,Alied Chem,no
 130210012,Macon Forestry,no
 130210013,Macon W,no
 130499000,,
-130510017,Market st,No
-130510021,Savannah E Pres,NO
+130510017,Market Street,No
+130510021,East President St.,NO
 130510091,Mercer,No
-130511002,L&A,No
-130590001,UGA,No
-130590002,athens college sta red,no
-130630091,Ga DOT,Yes
+130511002,Lathrop and Augusta,No
+130590001,University of Georgia,No
+130590002,Athens college sta red,no
+130630091,GA DOT,Yes
 130670003,National Guard,Yes
 130670004,MacLand,Yes
 130730001,Evans,No
@@ -23,13 +23,13 @@ Site.ID,Common.Name,MetroAtlanta
 130893001,Tucker,Yes
 130950007,Turner-Elementary-albany,
 130970004,W. Strickland St.,Yes
-131110091,MCayasville,No
+131110091,McCaysville,No
 131130001,Georgia DOT-Fayetteville,yes
 131150003,coosa elemn,yes
 131150005,coosa hs,yes
 131210032,e rivers,yes
 131210039,fs 8,yes
-131210048,ga tech,yes
+131210048,Georgia Tech Criteria,yes
 131210055,Confederate Ave.,yes
 131210056,,
 131270006,Brunswick,No
