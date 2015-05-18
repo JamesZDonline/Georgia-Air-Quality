@@ -54,7 +54,8 @@ nmax<-function(data,n){
 
 O3Standard<-ddply(O3DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard=nmax(Daily.Max,4))
 
-AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE))
+AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
+                       perc90=quantile(standard,probs=.9,na.rm=TRUE))
 
 s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=O3Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
          ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Georgia Ozone")
@@ -78,4 +79,20 @@ dev.off()
 
 jpeg("O3SplitPlot.jpg")
 plot(s4)
+dev.off()
+
+p1<-qplot(as.Date(year,format="%Y"),avg,data=AverageStandard, geom=c("line","point"),xlab="Year",
+          ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")
+plot(p1)
+
+p2 <- p1+scale_y_continuous(limits=c(0,.12),breaks=seq(.02,.12,.01))+
+   geom_abline(intercept=.075,slope=0,linetype="dotdash")+
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity")+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))
+
+plot(p2)
+
+jpeg("O3Smooth.jpg")
+plot(p2)
 dev.off()
