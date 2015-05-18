@@ -35,3 +35,11 @@ plot(s3)
 
 s4<-s3+facet_grid(MetroAtlanta~.)
 plot(s4)
+
+jpeg("PM25FullPlot.jpg")
+plot(s3)
+dev.off()
+
+jpeg("PM25SplitPlot.jpg")
+plot(s4)
+dev.off()
