@@ -22,7 +22,8 @@ s<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=LeadStandard, col
 plot(s)
 s2<-s+geom_abline(intercept=.15,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,.2),breaks=seq(0,.2,.01))+
-   theme(panel.background=element_rect(fill="white"))
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))
 plot(s2)
 
 s3<-s2+stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")

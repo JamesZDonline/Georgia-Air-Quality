@@ -25,7 +25,9 @@ s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=PM2.5Standard, col
 plot(s)
 s2<-s+geom_abline(intercept=35,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
-   theme(panel.background=element_rect(fill="white"))
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))
+
 plot(s2)
 
 s3<-s2+stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")

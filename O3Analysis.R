@@ -61,7 +61,9 @@ s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=O3Standard, color=
 plot(s)
 s2<-s+scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-   theme(panel.background=element_rect(fill="white"))
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))
+
 plot(s2)
 
 s3<-s2+stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
