@@ -1,11 +1,11 @@
 ---
-title: "Georgia Air Quality Trends: 2005-2015"
-output: html_document
+title: 'Georgia Air Quality Trends: 2005-2015'
+output: pdf_document
 ---
 
 
 
-##A brief word about the software.
+##A brief word about the software
 
 The software used in the data cleaning and analysis and the production of these graphics is R, a powerful open source statistacal software package that is rapidly becoming a standard for statistical analysis. It has the benefits of reproducibility as all analyses are scripted, so it is easy to replicate exactly the steps taken on a set of data, and even to quickly apply the same steps to new data. It is also highly flexible, with many addon packages available and maintained to aid in analysis and visualization. For more informatoni about R see <http://www.r-project.org/>. 
 
@@ -48,7 +48,8 @@ for (file in files){
    lastrow<-nrow(QData_tmp)
    QData_tmp <- QData_tmp[-lastrow,]
    
-   #Check if QData exists. If it doesn't, use tmp data to make QData. If it does, add tmp data to QData.
+   #Check if QData exists. If it doesn't, use tmp data to make QData. If it
+   #does, add tmp data to QData.
    if (exists("QData")){
       QData <- rbind(QData,QData_tmp)
       }else{
@@ -71,11 +72,12 @@ Once the data has been saved, it can be rapidly loaded using the following comma
 load("QData.RData")
 ```
 
-###Handeling RC vs RD data
+###Handling RC vs RD data
 Most of the data comes in the RD format, but as previously mentioned, some is RC (composite data). In order to correctly store all of the data in the same format, it is necessary to arrange the RC data to match the RD format and complete the table. To begin this process, the following code subsets out the RC data and saves it in a separate dataframe. It then renames the columns appropriately for RC data.
 ```{r}
-#Some of the data is composite data. Such data is labeled as RC in the X..RD column and should have different headers.
-#One way to fix this is to subset the data out, fix it and then merge it back in.
+#Some of the data is composite data. Such data is labeled as RC in the X..RD
+#column and should have different headers. One way to fix this is to subset the
+#data out, fix it and then merge it back in.
 RCData<-which(QData$X..RD=="RC")
 QDataRC<-QData[RCData,]
 
@@ -96,8 +98,8 @@ names(QDataRC)<-RCheaders
 The RD data table now contains Date and Start Time columns that are not included in the RC data table, as the RC data is data that was aggregated monthly. The following code fixes this by arbitrarily choosing the first of the month and 00:00 as the date and time used to represent the data.
 
 ```{r}
-#Create Date Variable for RC Data. I decided to set the day of the month to be the first for each month. I can change this later
-#if I find a need
+#Create Date Variable for RC Data. I decided to set the day of the month to be
+#the first for each month. I can change this later if I find a need
 QDataRC$Date<-paste(QDataRC$Year,QDataRC$Month,"01",sep="")
 
 #Likewise arbitrarily set the start time to be midnight

@@ -180,5 +180,8 @@ rm(QData)
 
 #Run analysis for each criteria
 source("O3Analysis.R")
+source("SO2Analysis.R")
+source("NO2Analysis.R")
+source("PM25Analysis.R")
 source("LeadAnalysis.R")
 
