@@ -33,3 +33,26 @@ jpeg("NO2FullPlot.jpg")
 plot(s3)
 dev.off()
 
+
+
+NO2Summary<-ddply(NO2Standard,.(year),summarize,average=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
+                    perc90=quantile(standard,probs=.9,na.rm=TRUE))
+
+p1<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=NO2Summary, geom=c("line","point"),xlab="Year",
+          ylab="NO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia NO2")
+plot(p1)
+
+p2<-p1+geom_abline(intercept=100,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))
+plot(p2)
+
+p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=NO2Summary,stat="identity")
+plot(p3)
+
+jpeg("NO2Smooth.jpg")
+plot(p3)
+dev.off()
+
+rm(list=ls())

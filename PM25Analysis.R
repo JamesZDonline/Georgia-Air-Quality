@@ -20,6 +20,7 @@ PM2.5Standard<-ddply(PM2.5Yearly,.(Common.Name),transform,standard=as.numeric(fi
 
 PM2.5Standard<-PM2.5Standard[complete.cases(PM2.5Standard),]
 
+
 s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=PM2.5Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
          ylab=bquote("PM2.5 Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia PM2.5")
 plot(s)
@@ -43,3 +44,26 @@ dev.off()
 jpeg("PM25SplitPlot.jpg")
 plot(s4)
 dev.off()
+
+
+PM2.5Summary<-ddply(PM2.5Standard,.(year),summarize,average=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
+                    perc90=quantile(standard,probs=.9,na.rm=TRUE))
+
+p1<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=PM2.5Summary, geom=c("line","point"),xlab="Year",
+          ylab=bquote("PM2.5 Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia PM2.5")
+plot(p1)
+
+p2<-p1+geom_abline(intercept=35,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))
+plot(p2)
+
+p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=PM2.5Summary,stat="identity")
+plot(p3)
+
+jpeg("PM25Smooth.jpg")
+plot(p3)
+dev.off()
+
+rm(list=ls())
