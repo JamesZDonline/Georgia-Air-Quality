@@ -96,3 +96,5 @@ plot(p2)
 jpeg("O3Smooth.jpg")
 plot(p2)
 dev.off()
+
+rm(list=ls())

@@ -63,7 +63,9 @@ plot(p2)
 p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=LeadSummary,stat="identity")
 plot(p3)
 
-jpg("LeadSmooth.jpg")
+jpeg("LeadSmooth.jpg")
 plot(p3)
 dev.off()
+
+rm(list=ls())
 
