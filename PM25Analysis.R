@@ -1,3 +1,4 @@
+require(plyr)
 load("PM25.RData")
 #98th percentile of 1-hour daily maximum concentrations, averaged over 3 years
 PM2.5$Site.ID<-factor(PM2.5$Site.ID)
