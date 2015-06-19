@@ -1,6 +1,7 @@
 require(plyr)
+require(ggplot2)
 load("PM25.RData")
-#98th percentile of 1-hour daily maximum concentrations, averaged over 3 years
+#98th percentile of average daily maximum concentrations, averaged over 3 years
 PM2.5$Site.ID<-factor(PM2.5$Site.ID)
 PM2.5$Sample.Duration<-factor(PM2.5$Sample.Duration)
 PM2.5$Start.Time<-factor(PM2.5$Start.Time)
@@ -8,10 +9,10 @@ PM2.5$Start.Time<-factor(PM2.5$Start.Time)
 #Fix an issue with units
 PM2.5$Sample.Value[PM2.5$Unit=="007"] <-PM2.5$Sample.Value[PM2.5$Unit=="007"]*1000
 
-PM2.5DailyMax<-ddply(PM2.5, .(Date,Common.Name,MetroAtlanta),.parallel=TRUE,summarize,Daily.Max=max(Sample.Value,na.rm=TRUE))
-PM2.5DailyMax$year<-factor(substr(as.character(PM2.5DailyMax$Date),1,4))
+PM2.5DailyMean<-ddply(PM2.5, .(Date,Common.Name,MetroAtlanta),.parallel=TRUE,summarize,Daily.Mean=mean(Sample.Value,na.rm=TRUE))
+PM2.5DailyMean$year<-factor(substr(as.character(PM2.5DailyMean$Date),1,4))
 
-PM2.5Yearly<-ddply(PM2.5DailyMax,.(year,Common.Name,MetroAtlanta),summarize,Yearly=quantile(Daily.Max,.98))
+PM2.5Yearly<-ddply(PM2.5DailyMean,.(year,Common.Name,MetroAtlanta),summarize,Yearly=quantile(Daily.Mean,.98,na.rm=T))
 
 f3<-rep(1/3,3)
 
