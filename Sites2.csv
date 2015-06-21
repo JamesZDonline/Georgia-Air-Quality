@@ -27,8 +27,8 @@ Site.ID,Common.Name,MetroAtlanta
 131130001,Georgia DOT-Fayetteville,yes
 131150003,Coosa Elementary,yes
 131150005,Coosa High school ,yes
-131210032,e rivers,yes
-131210039,fs 8,yes
+131210032,E. Rivers,yes
+131210039,Fire Station 8,yes
 131210048,Georgia Tech Criteria,yes
 131210055,Confederate Ave.,yes
 131210056,,
@@ -38,7 +38,7 @@ Site.ID,Common.Name,MetroAtlanta
 131510002,McDonough,yes
 131530001,Robins Air Force Base,No
 131850003,Mason Elementary-Valdosta,No
-132130003,Ft Mtn,No
+132130003,Ft Mountain,No
 132150001,Columbus Health Department,No
 132150008,Columbus Airport,no
 132150009,UPS,no

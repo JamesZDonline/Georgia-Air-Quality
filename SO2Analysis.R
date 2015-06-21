@@ -66,4 +66,9 @@ jpeg("SO2Smooth.jpg")
 plot(p3)
 dev.off()
 
-rm(list=ls())
+SO2Standard$year<-as.numeric(as.character(SO2Standard$year))
+
+percentChange<-ddply(SO2Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],numYears=max(year)-min(year)+1)
+write.table(percentChange,file="percentChangeSO2.csv",sep=";")
+# 
+# rm(list=ls())

@@ -1,8 +1,12 @@
+# Load Packages and Data --------------------------------------------------
 require(plyr)
 require(foreach)
 require(ggplot2)
 
 load("O3.RData")
+
+
+# Clean The data ----------------------------------------------------------
 
 #Remove months November, December, January and February
 nov<-which(O3$month=="11")
@@ -57,44 +61,70 @@ O3Standard<-ddply(O3DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard
 AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
                        perc90=quantile(standard,probs=.9,na.rm=TRUE))
 
-s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=O3Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Georgia Ozone")
-plot(s)
-s2<-s+scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+# Plots -------------------------------------------------------------------
+
+FullPlot<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=O3Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
+         ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Georgia Ozone")+
+   scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
    theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
 
-plot(s2)
+plot(FullPlot)
 
-s3<-s2+stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
-plot(s3)
+Metro<-O3Standard[O3Standard$MetroAtlanta=="Metro-Atlanta",]
+State<-O3Standard[O3Standard$MetroAtlanta=="State",]
 
-s4<-s3+facet_grid(MetroAtlanta~.)
-plot(s4)
+SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
+                  ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Metro-Atlanta Ozone")+geom_abline(intercept=35,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
 
-jpeg("O3FullPlot.jpg")
-plot(s3)
+plot(SplitMetro)
+
+SplitState<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=State, color=Common.Name, geom=c("line","point"),xlab="Year",
+                  ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Statewide Ozone")+
+   scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+
+plot(SplitState)
+
+jpeg("Plots/O3FullPlot.jpg")
+plot(FullPlot)
 dev.off()
 
-jpeg("O3SplitPlot.jpg")
-plot(s4)
+jpeg("Plots/O3MetroPlot.jpg")
+plot(SplitMetro)
 dev.off()
 
-p1<-qplot(as.Date(year,format="%Y"),avg,data=AverageStandard, geom=c("line","point"),xlab="Year",
-          ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")
-plot(p1)
+jpeg("Plots/O3StatePlot.jpg")
+plot(SplitState)
+dev.off()
 
-p2 <- p1+scale_y_continuous(limits=c(0,.12),breaks=seq(.02,.12,.01))+
+SmoothPlot<-qplot(as.Date(year,format="%Y"),avg,data=AverageStandard, geom=c("line","point"),xlab="Year",
+          ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")+
+   scale_y_continuous(limits=c(0,.12),breaks=seq(.02,.12,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash")+
-   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity")+
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity",fill="orange")+
    theme(panel.background=element_rect(fill="white"))+
    theme(panel.grid.major=element_line(colour="grey85"))
 
-plot(p2)
+plot(SmoothPlot)
 
-jpeg("O3Smooth.jpg")
-plot(p2)
+jpeg("Plots/O3Smooth.jpg")
+plot(SmoothPlot)
 dev.off()
 
+O3Standard$year<-as.numeric(as.character(O3Standard$year))
+
+percentChange<-ddply(O3Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],numYears=max(year)-min(year)+1)
+write.table(percentChange,file="percentChangeOzone.csv",sep=";")
 rm(list=ls())
+

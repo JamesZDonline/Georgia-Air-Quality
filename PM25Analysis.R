@@ -47,7 +47,7 @@ Metro<-PM2.5Standard[PM2.5Standard$MetroAtlanta=="Metro-Atlanta",]
 State<-PM2.5Standard[PM2.5Standard$MetroAtlanta=="State",]
 
 SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
-                  ylab=bquote("PM2.5 Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia PM2.5")+geom_abline(intercept=35,slope=0,linetype="dotdash")+
+                  ylab=bquote("PM2.5 Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Metro-Atlanta PM2.5")+geom_abline(intercept=35,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
    theme(panel.background=element_rect(fill="white"))+
    theme(panel.grid.major=element_line(colour="grey85"))+
@@ -56,7 +56,7 @@ SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, co
 plot(SplitMetro)
 
 SplitState<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=State, color=Common.Name, geom=c("line","point"),xlab="Year",
-                ylab=bquote("PM2.5 Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia PM2.5")+
+                ylab=bquote("PM2.5 Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Statewide PM2.5")+
    geom_abline(intercept=35,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
    theme(panel.background=element_rect(fill="white"))+
@@ -86,7 +86,7 @@ p1<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=PM2.5Summary, geom
    scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
    theme(panel.background=element_rect(fill="white"))+
    theme(panel.grid.major=element_line(colour="grey85"))+
-   geom_smooth(aes(ymin=perc10,ymax=perc90),data=PM2.5Summary,stat="identity")
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=PM2.5Summary,stat="identity",fill="orange")
 plot(p1)
 
 

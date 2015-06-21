@@ -1,6 +1,12 @@
+# Load Packages and Data --------------------------------------------------
+
 require(plyr)
 require(ggplot2)
 load("LeadData.RData")
+
+
+# Data Cleaning -----------------------------------------------------------
+
 #Annual Maximum 3 month rolling average
 Lead$Site.ID<-factor(Lead$Site.ID)
 Lead$Sample.Duration<-factor(Lead$Sample.Duration)
@@ -17,6 +23,9 @@ Lead$Sample.Value[Lead$Unit=="007"] <-Lead$Sample.Value[Lead$Unit=="007"]*1000
 #Lead Method code 092 was from 2004 to 2009
 Lead092<-Lead[Lead$Method=="092",]
 Lead110<-Lead[Lead$Method=="110",]
+
+
+# Create Standard ---------------------------------------------------------
 LeadMonthAvg<-ddply(Lead110,.(Common.Name,year,month,MetroAtlanta),summarize,monthavg=mean(Sample.Value,na.rm=T))
 
 f3<-rep(1/3,3)
@@ -27,27 +36,53 @@ LeadSummary<-ddply(LeadStandard,.(year,month),summarize,average=mean(standard,na
 
 LeadStandard<-LeadStandard[complete.cases(LeadStandard),]
 
-s<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=LeadStandard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia Lead")
-plot(s)
-s2<-s+geom_abline(intercept=.15,slope=0,linetype="dotdash")+
+
+# Plots -------------------------------------------------------------------
+
+FullPlot<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=LeadStandard, color=Common.Name, geom=c("line","point"),xlab="Year",
+         ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia Lead")+
+   geom_abline(intercept=.15,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,.2),breaks=seq(0,.2,.01))+
    theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))
-plot(s2)
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
 
-s3<-s2+stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
-plot(s3)
+plot(FullPlot)
 
-s4<-s3+facet_grid(MetroAtlanta~.)
-plot(s4)
+Metro<-LeadStandard[LeadStandard$MetroAtlanta=="Metro-Atlanta",]
+State<-LeadStandard[LeadStandard$MetroAtlanta=="State",]
 
-jpeg("LeadFullPlot.jpg")
-plot(s3)
+MetroSplit<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=Metro, color=Common.Name, geom=c("line","point"),xlab="Year",
+                ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Metro-Atlanta Lead")+
+   geom_abline(intercept=.15,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,.2),breaks=seq(0,.2,.01))+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+
+StateSplit<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=State, color=Common.Name, geom=c("line","point"),xlab="Year",
+                 ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Statewide Lead")+
+   geom_abline(intercept=.15,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,.2),breaks=seq(0,.2,.01))+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+
+
+plot(MetroSplit)
+
+plot(StateSplit)
+
+jpeg("Plots/LeadFullPlot.jpg")
+plot(FullPlot)
 dev.off()
 
-jpeg("LeadSplitPlot.jpg")
-plot(s4)
+jpeg("Plots/LeadMetroSplit.jpg")
+plot(MetroSplit)
+dev.off()
+
+jpeg("Plots/LeadStateSplit.jpg")
+plot(StateSplit)
 dev.off()
 
 p1<-qplot(as.Date(paste(year,month,"01",sep="-")),average,data=LeadSummary, geom=c("line","point"),xlab="Year",
@@ -60,12 +95,20 @@ p2<-p1+geom_abline(intercept=.15,slope=0,linetype="dotdash")+
    theme(panel.grid.major=element_line(colour="grey85"))
 plot(p2)
 
-p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=LeadSummary,stat="identity")
+p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=LeadSummary,stat="identity",fill="orange")
 plot(p3)
 
-jpeg("LeadSmooth.jpg")
+jpeg("Plots/LeadSmooth.jpg")
 plot(p3)
 dev.off()
 
-rm(list=ls())
+
+LeadStandard$year<-as.numeric(as.character(LeadStandard$year))
+LeadStandard$month<-as.numeric(as.character(LeadStandard$month))
+LeadStandard$date<-as.Date(paste(LeadStandard$year,LeadStandard$month,"01",sep="/"))
+
+percentChange<-ddply(LeadStandard,.(Common.Name),summarize,percentChange=(standard[date==max(date)]-standard[date==min(date)])/standard[date==max(date)],numYears=max(as.numeric(format(date,"%Y")))-min(as.numeric(format(date,"%Y"))))
+write.table(percentChange,file="percentChangeLead.csv",sep=";")
+
+#rm(list=ls())
 

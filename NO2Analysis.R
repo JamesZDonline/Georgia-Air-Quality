@@ -1,4 +1,11 @@
+# Load Libraries and Data -------------------------------------------------
+require(ggplot2)
+require(plyr)
 load("NO2.RData")
+
+
+# Do some data cleaning ---------------------------------------------------
+
 #Annual 98th percentile of daily max 1-hour average 
 NO2$Site.ID<-factor(NO2$Site.ID)
 NO2$Sample.Duration<-factor(NO2$Sample.Duration)
@@ -15,22 +22,19 @@ NO2DailyMax$year<-factor(substr(as.character(NO2DailyMax$Date),1,4))
 
 NO2Standard<-ddply(NO2DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard=quantile(Daily.Max,.98))
 
-s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=NO2Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab="NO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia NO2")
-plot(s)
-s2<-s+geom_abline(intercept=100,slope=0,linetype="dotdash")+
+
+# Create Plots ------------------------------------------------------------
+FullPlot<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=NO2Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
+         ylab="NO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia NO2")+
+   geom_abline(intercept=100,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
    theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+plot(FullPlot)
 
-plot(s2)
-
-s3<-s2+stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
-plot(s3)
-
-
-jpeg("NO2FullPlot.jpg")
-plot(s3)
+jpeg("Plots/NO2FullPlot.jpg")
+plot(FullPlot)
 dev.off()
 
 
@@ -48,11 +52,17 @@ p2<-p1+geom_abline(intercept=100,slope=0,linetype="dotdash")+
    theme(panel.grid.major=element_line(colour="grey85"))
 plot(p2)
 
-p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=NO2Summary,stat="identity")
+p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=NO2Summary,stat="identity",fill="orange")
 plot(p3)
 
-jpeg("NO2Smooth.jpg")
+jpeg("Plots/NO2Smooth.jpg")
 plot(p3)
 dev.off()
 
+NO2Standard$year<-as.numeric(as.character(NO2Standard$year))
+
+percentChange<-ddply(NO2Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],numYears=max(year)-min(year)+1)
+write.table(percentChange,file="percentChangeNO2.csv",sep=";")
+
 rm(list=ls())
+
