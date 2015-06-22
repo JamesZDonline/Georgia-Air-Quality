@@ -22,53 +22,76 @@ SO2Standard<-ddply(SO2DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standa
 
 SO2Standard<-SO2Standard[-which(is.infinite(SO2Standard$standard)),]
 
-s<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=SO2Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia SO2")
-plot(s)
-s2<-s+geom_abline(intercept=75,slope=0,linetype="dotdash")+
+FullPlot<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=SO2Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
+         ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia SO2")+
+   geom_abline(intercept=75,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
    theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))
-#+   theme(panel.grid.minor=element_line(colour="gray70"))
-plot(s2)
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+plot(FullPlot)
 
-s3<-s2+stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
-plot(s3)
 
-s4<-s3+facet_grid(MetroAtlanta~.)
-plot(s4)
 
-jpeg("SO2FullPlot.jpg")
-plot(s3)
+Metro<-SO2Standard[SO2Standard$MetroAtlanta=="Metro-Atlanta",]
+State<-SO2Standard[SO2Standard$MetroAtlanta=="State",]
+
+SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
+                  ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Metro-Atlanta SO2")+
+   geom_abline(intercept=35,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+
+plot(SplitMetro)
+
+SplitState<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=State, color=Common.Name, geom=c("line","point"),xlab="Year",
+                  ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Statewide SO2")+
+   geom_abline(intercept=35,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
+   theme(panel.background=element_rect(fill="white"))+
+   theme(panel.grid.major=element_line(colour="grey85"))+
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+
+plot(SplitState)
+
+svg("Plots/SO2FullPlot.svg",width=8, height=8)
+plot(FullPlot)
 dev.off()
 
-jpeg("SO2SplitPlot.jpg")
-plot(s4)
+svg("Plots/SO2SplitMetro.svg",width=8, height=8)
+plot(SplitMetro)
+dev.off()
+
+svg("Plots/SO2SplitState.svg",width=8, height=8)
+plot(SplitState)
 dev.off()
 
 SO2Summary<-ddply(SO2Standard,.(year),summarize,average=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
                   perc90=quantile(standard,probs=.9,na.rm=TRUE))
 
-p1<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=SO2Summary, geom=c("line","point"),xlab="Year",
-          ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia SO2")
-plot(p1)
-
-p2<-p1+geom_abline(intercept=75,slope=0,linetype="dotdash")+
+FullPlot<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=SO2Summary, geom=c("line","point"),xlab="Year",
+          ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia SO2")+
+   geom_abline(intercept=75,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
    theme(panel.background=element_rect(fill="white"))+
    theme(panel.grid.major=element_line(colour="grey85"))
-plot(p2)
 
-p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=SO2Summary,stat="identity")
-plot(p3)
+plot(FullPlot)
 
-jpeg("SO2Smooth.jpg")
-plot(p3)
+
+
+SmoothPlot<-FullPlot+geom_smooth(aes(ymin=perc10,ymax=perc90),data=SO2Summary,stat="identity",fill="orange")
+plot(SmoothPlot)
+
+svg("Plots/SO2Smooth.svg",width=8, height=8)
+plot(SmoothPlot)
 dev.off()
 
 SO2Standard$year<-as.numeric(as.character(SO2Standard$year))
 
-percentChange<-ddply(SO2Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],numYears=max(year)-min(year)+1)
-write.table(percentChange,file="percentChangeSO2.csv",sep=";")
+percentChange<-ddply(SO2Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],StartYear=min(year),EndYear=max(year)+1)
+write.table(percentChange,file="PercentChange/percentChangeSO2.csv",sep=",",row.names=F)
 # 
 # rm(list=ls())
