@@ -38,8 +38,8 @@ State<-SO2Standard[SO2Standard$MetroAtlanta=="State",]
 
 SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
                   ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Metro-Atlanta SO2")+
-   geom_abline(intercept=35,slope=0,linetype="dotdash")+
-   scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
+   geom_abline(intercept=75,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
    theme(panel.background=element_rect(fill="white"))+
    theme(panel.grid.major=element_line(colour="grey85"))+
    stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
@@ -48,8 +48,8 @@ plot(SplitMetro)
 
 SplitState<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=State, color=Common.Name, geom=c("line","point"),xlab="Year",
                   ylab="SO2 Concentration (ppb) Standard", main="Yearly Trend in Statewide SO2")+
-   geom_abline(intercept=35,slope=0,linetype="dotdash")+
-   scale_y_continuous(limits=c(0,70),breaks=seq(0,70,10))+
+   geom_abline(intercept=75,slope=0,linetype="dotdash")+
+   scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
    theme(panel.background=element_rect(fill="white"))+
    theme(panel.grid.major=element_line(colour="grey85"))+
    stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
