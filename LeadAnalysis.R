@@ -73,15 +73,15 @@ plot(MetroSplit)
 
 plot(StateSplit)
 
-jpeg("Plots/LeadFullPlot.jpg")
+svg("Plots/LeadFullPlot.svg",width=8)
 plot(FullPlot)
 dev.off()
 
-jpeg("Plots/LeadMetroSplit.jpg")
+svg("Plots/LeadMetroSplit.svg",width=8)
 plot(MetroSplit)
 dev.off()
 
-jpeg("Plots/LeadStateSplit.jpg")
+svg("Plots/LeadStateSplit.svg",width=8)
 plot(StateSplit)
 dev.off()
 
@@ -98,7 +98,7 @@ plot(p2)
 p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=LeadSummary,stat="identity",fill="orange")
 plot(p3)
 
-jpeg("Plots/LeadSmooth.jpg")
+svg("Plots/LeadSmooth.svg",width=8)
 plot(p3)
 dev.off()
 
@@ -107,8 +107,8 @@ LeadStandard$year<-as.numeric(as.character(LeadStandard$year))
 LeadStandard$month<-as.numeric(as.character(LeadStandard$month))
 LeadStandard$date<-as.Date(paste(LeadStandard$year,LeadStandard$month,"01",sep="/"))
 
-percentChange<-ddply(LeadStandard,.(Common.Name),summarize,percentChange=(standard[date==max(date)]-standard[date==min(date)])/standard[date==max(date)],numYears=max(as.numeric(format(date,"%Y")))-min(as.numeric(format(date,"%Y"))))
-write.table(percentChange,file="percentChangeLead.csv",sep=";")
+percentChange<-ddply(LeadStandard,.(Common.Name),summarize,percentChange=(standard[date==max(date)]-standard[date==min(date)])/standard[date==max(date)],StartYear=min(as.numeric(format(date,"%Y"))),EndYear=max(as.numeric(format(date,"%Y"))))
+write.table(percentChange,file="PercentChange/percentChangeLead.csv",sep=",",row.names=F)
 
 #rm(list=ls())
 

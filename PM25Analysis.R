@@ -65,15 +65,15 @@ SplitState<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=State, co
 
 plot(SplitState)
 
-jpeg("Plots/PM25FullPlot.jpg")
+svg("Plots/PM25FullPlot.svg",width=8, height=8)
 plot(FullPlot)
 dev.off()
 
-jpeg("Plots/PM25SplitMetro.jpg")
+svg("Plots/PM25SplitMetro.svg",width=8, height=8)
 plot(SplitMetro)
 dev.off()
 
-jpeg("Plots/PM25SplitState.jpg")
+svg("Plots/PM25SplitState.svg",width=8, height=8)
 plot(SplitState)
 dev.off()
 
@@ -90,8 +90,20 @@ p1<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=PM2.5Summary, geom
 plot(p1)
 
 
-jpeg("Plots/PM25Smooth.jpg")
+svg("Plots/PM25Smooth.svg",width=8, height=8)
 plot(p1)
 dev.off()
 
+PM2.5Standard$year<-as.numeric(as.character(PM2.5Standard$year))
+percentChange<-ddply(PM2.5Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],StartYear=min(year),EndYear=max(year)+1)
+write.table(percentChange,file="PercentChange/percentChangePM25.csv",sep=",",row.names=F)
+
+
+SiteLookup<-read.csv("Sites2.csv",sep=",",header=T)
+mapData<-merge(SiteLookup,PM2.5Standard,by="Common.Name")
+mapData$MetroAtlanta.x<-NULL
+mapData$MetroAtlanta.y<-NULL
+minyear<-PM2.5Standard$year<-min(as.numeric(as.character(PM2.5Standard$year)))
+write.table(mapData[mapData$year==2014,],file="MapFiles/PM25MapData2014.csv",sep=",",row.names=F)
+write.table(mapData[mapData$year==minyear,],file=paste("MapFiles/PM25MapData",minyear,".csv",sep=""),sep=",",row.names=F)
 #rm(list=ls())

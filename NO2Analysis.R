@@ -33,7 +33,7 @@ FullPlot<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=NO2Standard
    stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
 plot(FullPlot)
 
-jpeg("Plots/NO2FullPlot.jpg")
+svg("Plots/NO2FullPlot.svg",width=8, height=8)
 plot(FullPlot)
 dev.off()
 
@@ -55,14 +55,14 @@ plot(p2)
 p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=NO2Summary,stat="identity",fill="orange")
 plot(p3)
 
-jpeg("Plots/NO2Smooth.jpg")
+svg("Plots/NO2Smooth.svg",width=8, height=8)
 plot(p3)
 dev.off()
 
 NO2Standard$year<-as.numeric(as.character(NO2Standard$year))
 
-percentChange<-ddply(NO2Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],numYears=max(year)-min(year)+1)
-write.table(percentChange,file="percentChangeNO2.csv",sep=";")
+percentChange<-ddply(NO2Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],StartYear=min(year),EndYear=max(year)+1)
+write.table(percentChange,file="PercentChange/percentChangeNO2.csv",sep=",",row.names=F)
 
 rm(list=ls())
 

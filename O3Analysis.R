@@ -47,15 +47,18 @@ fil<-rep(1/8,8)
 
 O3<-ddply(O3,.(year),mutate, hr8mean=as.numeric(filter(Sample.Value,fil,sides=1)))
 
+#Then Compute the daily max of those 8-hour averages
 O3DailyMax<-ddply(O3, .(Date,Common.Name,MetroAtlanta),.parallel=TRUE,summarize,Daily.Max=max(Sample.Value,na.rm=TRUE))
 
 O3DailyMax$year<-factor(substr(as.character(O3DailyMax$Date),1,4))
 
+#This function finds the n-th maximum in a vector
 nmax<-function(data,n){
    len<-length(data)
    sort(data,partial=len-n)[len-n+1]
 }
 
+#Now we find the 4th highest annual daily maximum
 O3Standard<-ddply(O3DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard=nmax(Daily.Max,4))
 
 AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
@@ -96,21 +99,21 @@ SplitState<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=State, co
 
 plot(SplitState)
 
-jpeg("Plots/O3FullPlot.jpg")
+svg("Plots/O3FullPlot.svg",width=8, height=8)
 plot(FullPlot)
 dev.off()
 
-jpeg("Plots/O3MetroPlot.jpg")
+svg("Plots/O3MetroPlot.svg",width=8, height=8)
 plot(SplitMetro)
 dev.off()
 
-jpeg("Plots/O3StatePlot.jpg")
+svg("Plots/O3StatePlot.svg",width=8, height=8)
 plot(SplitState)
 dev.off()
 
 SmoothPlot<-qplot(as.Date(year,format="%Y"),avg,data=AverageStandard, geom=c("line","point"),xlab="Year",
           ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")+
-   scale_y_continuous(limits=c(0,.12),breaks=seq(.02,.12,.01))+
+   scale_y_continuous(limits=c(0,.15),breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash")+
    geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity",fill="orange")+
    theme(panel.background=element_rect(fill="white"))+
@@ -118,13 +121,19 @@ SmoothPlot<-qplot(as.Date(year,format="%Y"),avg,data=AverageStandard, geom=c("li
 
 plot(SmoothPlot)
 
-jpeg("Plots/O3Smooth.jpg")
+svg("Plots/O3Smooth.svg",width=8, height=8)
 plot(SmoothPlot)
 dev.off()
 
 O3Standard$year<-as.numeric(as.character(O3Standard$year))
 
-percentChange<-ddply(O3Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],numYears=max(year)-min(year)+1)
-write.table(percentChange,file="percentChangeOzone.csv",sep=";")
-rm(list=ls())
+percentChange<-ddply(O3Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],StartYear=min(year),EndYear=max(year)+1)
+write.table(percentChange,file="PercentChange/percentChangeOzone.csv",sep=",",row.names=F)
+# rm(list=ls())
 
+SiteLookup<-read.csv("Sites2.csv",sep=",",header=T)
+mapData<-merge(SiteLookup,O3Standard,by="Common.Name")
+mapData$MetroAtlanta.x<-NULL
+mapData$MetroAtlanta.y<-NULL
+write.table(mapData[mapData$year==2014,],file="MapFiles/OzoneMapData2014.csv",sep=",",row.names=F)
+write.table(mapData[mapData$year==2005,],file="MapFiles/OzoneMapData2005.csv",sep=",",row.names=F)
