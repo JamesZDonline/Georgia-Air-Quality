@@ -1,5 +1,6 @@
 # Load Packages and Data --------------------------------------------------
 require(plyr)
+require(reshape)
 require(foreach)
 require(ggplot2)
 
@@ -133,7 +134,8 @@ write.table(percentChange,file="PercentChange/percentChangeOzone.csv",sep=",",ro
 
 SiteLookup<-read.csv("Sites2.csv",sep=",",header=T)
 mapData<-merge(SiteLookup,O3Standard,by="Common.Name")
-mapData$MetroAtlanta.x<-NULL
-mapData$MetroAtlanta.y<-NULL
-write.table(mapData[mapData$year==2014,],file="MapFiles/OzoneMapData2014.csv",sep=",",row.names=F)
-write.table(mapData[mapData$year==2005,],file="MapFiles/OzoneMapData2005.csv",sep=",",row.names=F)
+mapDataMelt<-melt(mapData,id.vars = c("Common.Name","Site.ID","year"))
+mapData<-cast(mapData,Common.Name+Site.ID~year)
+
+write.table(mapData,file="MapFiles/OzoneMapData.csv",sep=",",row.names=F)
+
