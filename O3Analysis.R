@@ -2,6 +2,8 @@
 require(plyr)
 require(reshape)
 require(foreach)
+require(RColorBrewer)
+require(scales)
 require(ggplot2)
 
 load("O3.RData")
@@ -64,41 +66,73 @@ O3Standard<-ddply(O3DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard
 
 AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
                        perc90=quantile(standard,probs=.9,na.rm=TRUE))
-
+O3Standard$year<-as.Date(paste(O3Standard$year,"01","01",sep="-"))
 # Plots -------------------------------------------------------------------
+cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+family="Ariel"
+legendrows=2
+yaxisLimits=c(.05,.14)
+AllMyOpts<-theme(plot.title=element_text(family=family,face="bold",size=20),
+                       legend.title=element_text(family=family,face="bold"),
+                       legend.text=element_text(family=family,face="plain"),
+                       axis.text=element_text(family=family,face="plain",colour="black"),
+                       axis.title=(element_text(family=family,face="bold",colour="black")),
+                       axis.title.y=(element_text(vjust = .75)),
+                       legend.position="bottom",
+                       panel.background=element_rect(fill="white"),
+                       panel.grid.major=element_line(colour="grey85"))
 
-FullPlot<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=O3Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Georgia Ozone")+
-   scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+FullPlot<-ggplot(O3Standard,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+
+   geom_point(size=2.75)+ggtitle("8-Hour Ozone Annual Trend")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
+   scale_linetype_manual(values=c(rep("solid",8),rep("dashed",7),rep("dotted",7)),name="")+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:7],cbbPalette[1:7]),name="")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+   scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
+   
 
 plot(FullPlot)
 
 Metro<-O3Standard[O3Standard$MetroAtlanta=="Metro-Atlanta",]
 State<-O3Standard[O3Standard$MetroAtlanta=="State",]
 
-SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
-                  ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Metro-Atlanta Ozone")+geom_abline(intercept=35,slope=0,linetype="dotdash")+
-   scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+# SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
+#                   ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Metro-Atlanta Ozone")+geom_abline(intercept=35,slope=0,linetype="dotdash")+
+#    scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+#    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+#    theme(panel.background=element_rect(fill="white"))+
+#    theme(panel.grid.major=element_line(colour="grey85"))+
+#    stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+
+SplitMetro<-ggplot(Metro,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
+   ggtitle("8-Hour Ozone Annual Trend (Metro-Atlanta)")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
+   scale_linetype_manual(values=c(rep("solid",6),rep("dashed",6)),name="")+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:4]),name="")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+   scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
 
 plot(SplitMetro)
 
-SplitState<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=State, color=Common.Name, geom=c("line","point"),xlab="Year",
-                  ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Statewide Ozone")+
-   scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+SplitState<-ggplot(State,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
+   ggtitle("8-Hour Ozone Annual Trend (Non-Metro-Atlanta)")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
+   scale_linetype_manual(values=c(rep("solid",6),rep("dashed",5)),name="")+
+   scale_color_manual(values=c(cbbPalette,cbbPalette),name="")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+   scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
 
 plot(SplitState)
+
+jpeg("Plots/O3FullPlot.jpg",width=1600,height=1600)
+plot(FullPlot)
+dev.off()
 
 svg("Plots/O3FullPlot.svg",width=8, height=8)
 plot(FullPlot)
@@ -113,12 +147,10 @@ plot(SplitState)
 dev.off()
 
 SmoothPlot<-qplot(as.Date(year,format="%Y"),avg,data=AverageStandard, geom=c("line","point"),xlab="Year",
-          ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")+
+    ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")+AllMyOpts+
    scale_y_continuous(limits=c(0,.15),breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash")+
-   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity",fill="orange")+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity",fill="orange")
 
 plot(SmoothPlot)
 
@@ -126,10 +158,21 @@ svg("Plots/O3Smooth.svg",width=8, height=8)
 plot(SmoothPlot)
 dev.off()
 
-O3Standard$year<-as.numeric(as.character(O3Standard$year))
+startYear=min(O3Standard$year)
+endYear=max(O3Standard$year)
 
-percentChange<-ddply(O3Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],StartYear=min(year),EndYear=max(year)+1)
-write.table(percentChange,file="PercentChange/percentChangeOzone.csv",sep=",",row.names=F)
+O3StandMelt<-melt(O3Standard,id.vars = c("year","Common.Name","MetroAtlanta"))
+O3StandCast<-cast(O3StandMelt,year+Common.Name~MetroAtlanta)
+names(O3StandCast)<-c("year","Common.Name","Metro","State")
+O3StandAvg<-ddply(O3StandCast,.(year),summarize,Metroaverage=mean(Metro,na.rm=T),Stateaverage=mean(State,na.rm=T))
+O3StandAvg$Full<-AverageStandard$avg
+O3PercChange<-data.frame((O3StandAvg[which(O3StandAvg$year==startYear),2:4]-O3StandAvg[O3StandAvg$year==endYear,2:4])/O3StandAvg[O3StandAvg$year==startYear,2:4])
+O3PercChange$Pollutant<-"Ozone"
+O3PercChange$startYear=startYear
+O3PercChange$endYear=endYear
+
+write.table(O3PercChange,file="PercentChange/percentchange.csv",sep=",",row.names=F)
+
 # rm(list=ls())
 
 SiteLookup<-read.csv("Sites2.csv",sep=",",header=T)

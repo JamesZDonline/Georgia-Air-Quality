@@ -16,20 +16,32 @@ NO2<-NO2[-which(NO2$Common.Name==""),]
 
 #Fix an issue with units
 NO2$Sample.Value[NO2$Unit=="007"] <-NO2$Sample.Value[NO2$Unit=="007"]*1000
+NO2$Unit[NO2$Unit=="007"] <-"008"
+
 
 NO2DailyMax<-ddply(NO2, .(Date,Common.Name,MetroAtlanta),.parallel=TRUE,summarize,Daily.Max=max(Sample.Value,na.rm=TRUE))
 NO2DailyMax$year<-factor(substr(as.character(NO2DailyMax$Date),1,4))
 
 NO2Standard<-ddply(NO2DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standard=quantile(Daily.Max,.98))
 
-
+NO2Standard$year<-as.Date(paste(NO2Standard$year,"01","01",sep="-"))
 # Create Plots ------------------------------------------------------------
-FullPlot<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=NO2Standard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab="NO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia NO2")+
+cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+family="Times"
+AllMyOpts<-theme(plot.title=element_text(family=family,face="bold",size=20),
+                 legend.title=element_text(family=family,face="bold",size=15),
+                 legend.text=element_text(family=family,face="plain",size=12),
+                 axis.text=element_text(family=family,face="plain",size=11,colour="black"),
+                 axis.title=(element_text(family=family,face="bold",size=15,colour="black")),
+                 axis.title.y=(element_text(vjust = .75)),
+                 panel.background=element_rect(fill="white"),
+                 panel.grid.major=element_line(colour="grey85"))
+
+FullPlot<-ggplot(NO2Standard,aes(x=year,y=standard,col=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
+   ggtitle("Yearly Trend in Georgia NO2")+xlab("Year")+ylab("NO2 Concentration (ppb) Standard")+AllMyOpts+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:7],cbbPalette[1:7]),name="Common Name")+
    geom_abline(intercept=100,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))+
    stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
 plot(FullPlot)
 
@@ -42,27 +54,40 @@ dev.off()
 NO2Summary<-ddply(NO2Standard,.(year),summarize,average=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
                     perc90=quantile(standard,probs=.9,na.rm=TRUE))
 
-p1<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=NO2Summary, geom=c("line","point"),xlab="Year",
-          ylab="NO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia NO2")
-plot(p1)
-
-p2<-p1+geom_abline(intercept=100,slope=0,linetype="dotdash")+
-   scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))
-plot(p2)
-
-p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=NO2Summary,stat="identity",fill="orange")
+p3<-qplot(as.Date(paste(year,"01","01",sep="-")),average,data=NO2Summary, geom=c("line","point"),xlab="Year",
+          ylab="NO2 Concentration (ppb) Standard", main="Yearly Trend in Georgia NO2")+AllMyOpts+
+          geom_abline(intercept=100,slope=0,linetype="dotdash")+
+          scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
+          geom_smooth(aes(ymin=perc10,ymax=perc90),data=NO2Summary,stat="identity",fill="orange")
 plot(p3)
 
 svg("Plots/NO2Smooth.svg",width=8, height=8)
 plot(p3)
 dev.off()
 
-NO2Standard$year<-as.numeric(as.character(NO2Standard$year))
 
-percentChange<-ddply(NO2Standard,.(Common.Name),summarize,percentChange=(standard[year==max(year)]-standard[year==min(year)])/standard[year==max(year)],StartYear=min(year),EndYear=max(year)+1)
-write.table(percentChange,file="PercentChange/percentChangeNO2.csv",sep=",",row.names=F)
+# Calculate Pecent Change -------------------------------------------------
 
-rm(list=ls())
+
+startYear=min(NO2Standard$year)
+endYear=max(NO2Standard$year)
+
+NO2StandMelt<-melt(NO2Standard,id.vars = c("year","Common.Name","MetroAtlanta"))
+NO2StandCast<-cast(NO2StandMelt,year+Common.Name~MetroAtlanta)
+names(NO2StandCast)<-c("year","Common.Name","Metro")
+NO2StandAvg<-ddply(NO2StandCast,.(year),summarize,Metroaverage=mean(Metro,na.rm=T))
+NO2StandAvg$State<-NA
+NO2StandAvg$Full<-NO2Summary$average
+
+NO2PercChange<-data.frame((NO2StandAvg[which(NO2StandAvg$year==startYear),2:4]-NO2StandAvg[NO2StandAvg$year==endYear,2:4])/NO2StandAvg[NO2StandAvg$year==startYear,2:4])
+
+NO2PercChange$Pollutant<-"NO2"
+NO2PercChange$startYear=startYear
+NO2PercChange$endYear=endYear
+
+
+
+write.table(NO2PercChange,file="PercentChange/percentchange.csv",sep=",",append=T,row.names=F,col.names=F)
+# 
+# rm(list=ls())
 
