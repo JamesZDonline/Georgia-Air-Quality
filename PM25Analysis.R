@@ -38,11 +38,13 @@ PM2.5Standard$year<-as.Date(paste(PM2.5Standard$year,"01","01",sep="-"))
 # Plot Data ---------------------------------------------------------------
 cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
 family="Times"
-AllMyOpts<-theme(plot.title=element_text(family=family,face="bold",size=20),
-                 legend.title=element_text(family=family,face="bold",size=15),
-                 legend.text=element_text(family=family,face="plain",size=12),
-                 axis.text=element_text(family=family,face="plain",size=11,colour="black"),
-                 axis.title=(element_text(family=family,face="bold",size=15,colour="black")),
+legendrows=4
+AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
+                 legend.title=element_text(family=family,face="bold"),
+                 legend.text=element_text(family=family,face="plain"),
+                 axis.text=element_text(family=family,face="plain",colour="black"),
+                 axis.title=(element_text(family=family,face="bold",colour="black")),
+                 legend.position="bottom",
                  axis.title.y=(element_text(vjust = .75)),
                  panel.background=element_rect(fill="white"),
                  panel.grid.major=element_line(colour="grey85"))
@@ -53,7 +55,8 @@ FullPlot<-ggplot(PM2.5Standard,aes(x=year,y=standard,col=Common.Name,linetype=Co
    scale_color_manual(values=c(cbbPalette,cbbPalette,cbbPalette,cbbPalette),name="Common Name")+
    geom_abline(intercept=35,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,50),breaks=seq(0,50,10))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
 
 plot(FullPlot)
 

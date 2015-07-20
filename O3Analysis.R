@@ -20,8 +20,8 @@ feb<-which(O3$month=='02')
 O3<-O3[-c(jan,feb,nov,dec),]
 
 
-#Also remove the 2004 Data
-tooearly<-which(O3$year=="2004")
+#Also remove the 2004 and 2003 Data
+tooearly<-which(O3$year=="2004"|O3$year=="2003")
 O3<-O3[-tooearly,]
 
 #Fix an issue with units
@@ -70,9 +70,9 @@ O3Standard$year<-as.Date(paste(O3Standard$year,"01","01",sep="-"))
 # Plots -------------------------------------------------------------------
 cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
 family="Ariel"
-legendrows=2
+legendrows=4
 yaxisLimits=c(.05,.14)
-AllMyOpts<-theme(plot.title=element_text(family=family,face="bold",size=20),
+AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
                        legend.title=element_text(family=family,face="bold"),
                        legend.text=element_text(family=family,face="plain"),
                        axis.text=element_text(family=family,face="plain",colour="black"),
@@ -84,8 +84,8 @@ AllMyOpts<-theme(plot.title=element_text(family=family,face="bold",size=20),
 
 FullPlot<-ggplot(O3Standard,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+
    geom_point(size=2.75)+ggtitle("8-Hour Ozone Annual Trend")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
-   scale_linetype_manual(values=c(rep("solid",8),rep("dashed",7),rep("dotted",7)),name="")+
-   scale_color_manual(values=c(cbbPalette,cbbPalette[1:7],cbbPalette[1:7]),name="")+
+   scale_linetype_manual(values=c(rep("solid",8),rep("dashed",8),rep("dotted",7)),name="")+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:8],cbbPalette[1:7]),name="")+
    scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
    scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
