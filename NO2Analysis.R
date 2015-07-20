@@ -27,25 +27,28 @@ NO2Standard<-ddply(NO2DailyMax,.(year,Common.Name,MetroAtlanta),summarize,standa
 NO2Standard$year<-as.Date(paste(NO2Standard$year,"01","01",sep="-"))
 # Create Plots ------------------------------------------------------------
 cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
-family="Times"
-AllMyOpts<-theme(plot.title=element_text(family=family,face="bold",size=20),
-                 legend.title=element_text(family=family,face="bold",size=15),
-                 legend.text=element_text(family=family,face="plain",size=12),
-                 axis.text=element_text(family=family,face="plain",size=11,colour="black"),
-                 axis.title=(element_text(family=family,face="bold",size=15,colour="black")),
+family="Ariel"
+legendrows=1
+AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
+                 legend.title=element_text(family=family,face="bold"),
+                 legend.text=element_text(family=family,face="plain"),
+                 axis.text=element_text(family=family,face="plain",colour="black"),
+                 axis.title=(element_text(family=family,face="bold",colour="black")),
                  axis.title.y=(element_text(vjust = .75)),
+                 legend.position="bottom",
                  panel.background=element_rect(fill="white"),
                  panel.grid.major=element_line(colour="grey85"))
 
 FullPlot<-ggplot(NO2Standard,aes(x=year,y=standard,col=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
-   ggtitle("Yearly Trend in Georgia NO2")+xlab("Year")+ylab("NO2 Concentration (ppb) Standard")+AllMyOpts+
-   scale_color_manual(values=c(cbbPalette,cbbPalette[1:7],cbbPalette[1:7]),name="Common Name")+
+   ggtitle("Yearly Trend in Georgia NO2")+xlab("Year")+ylab("NO2 Concentration (ppb)\nStandard")+AllMyOpts+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:7],cbbPalette[1:7]),name="")+
    geom_abline(intercept=100,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,100),breaks=seq(0,100,10))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
 plot(FullPlot)
 
-svg("Plots/NO2FullPlot.svg",width=8, height=8)
+svg("Plots/NO2FullPlot.svg",width=6.5, height=4)
 plot(FullPlot)
 dev.off()
 

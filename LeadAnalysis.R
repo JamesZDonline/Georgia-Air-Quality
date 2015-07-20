@@ -46,35 +46,59 @@ LeadStandard<-LeadStandard[complete.cases(LeadStandard),]
 
 
 # Plots -------------------------------------------------------------------
+cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+family="Ariel"
+legendrows=1
+yaxisLimits=c(.05,.14)
+AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
+                 legend.title=element_text(family=family,face="bold"),
+                 legend.text=element_text(family=family,face="plain"),
+                 axis.text=element_text(family=family,face="plain",colour="black"),
+                 axis.title=(element_text(family=family,face="bold",colour="black")),
+                 axis.title.y=(element_text(vjust = .75)),
+                 legend.position="bottom",
+                 panel.background=element_rect(fill="white"),
+                 panel.grid.major=element_line(colour="grey85"))
 
-FullPlot<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=LeadStandard, color=Common.Name, geom=c("line","point"),xlab="Year",
-         ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia Lead")+
-   geom_abline(intercept=.15,slope=0,linetype="dotdash")+
+FullPlot<-ggplot(LeadStandard,aes(x=as.Date(paste(year,month,"01",sep="-")),y=standard,col=Common.Name))+
+   geom_line(lwd=1.2)+geom_point(size=2.75)+ggtitle("Yearly Trend in Georgia Lead")+xlab("Year")+
+   ylab(bquote("Lead Concentration (μg/"~m^3~") Standard"))+AllMyOpts+
+   scale_linetype_manual(values=c(rep("solid",8),rep("dashed",8),rep("dotted",7)),name="")+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:8],cbbPalette[1:7]),name="")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
    scale_y_continuous(limits=c(0,.24),breaks=seq(0,.24,.01))+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
 
 plot(FullPlot)
 
 Metro<-LeadStandard[LeadStandard$MetroAtlanta=="Metro-Atlanta",]
 State<-LeadStandard[LeadStandard$MetroAtlanta=="State",]
 
-MetroSplit<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=Metro, color=Common.Name, geom=c("line","point"),xlab="Year",
-                ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Metro-Atlanta Lead")+
-   geom_abline(intercept=.15,slope=0,linetype="dotdash")+
+MetroSplit<-ggplot(Metro,aes(x=as.Date(paste(year,month,"01",sep="-")),y=standard,col=Common.Name))+
+   geom_line(lwd=1.2)+geom_point(size=2.75)+ggtitle("Yearly Trend in Georgia Lead")+xlab("Year")+
+   ylab(bquote("Lead Concentration (μg/"~m^3~") Standard"))+AllMyOpts+
+   scale_linetype_manual(values=c(rep("solid",8),rep("dashed",8),rep("dotted",7)),name="")+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:8],cbbPalette[1:7]),name="")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
    scale_y_continuous(limits=c(0,.24),breaks=seq(0,.24,.01))+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
+   
+   
 
-StateSplit<-qplot(as.Date(paste(year,month,"01",sep="-")),standard,data=State, color=Common.Name, geom=c("line","point"),xlab="Year",
-                 ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Statewide Lead")+
-   geom_abline(intercept=.15,slope=0,linetype="dotdash")+
+StateSplit<-ggplot(State,aes(x=as.Date(paste(year,month,"01",sep="-")),y=standard,col=Common.Name))+
+   geom_line(lwd=1.2)+geom_point(size=2.75)+ggtitle("Yearly Trend in Georgia Lead")+xlab("Year")+
+   ylab(bquote("Lead Concentration (μg/"~m^3~") Standard"))+AllMyOpts+
+   scale_linetype_manual(values=c(rep("solid",8),rep("dashed",8),rep("dotted",7)),name="")+
+   scale_color_manual(values=c(cbbPalette,cbbPalette[1:8],cbbPalette[1:7]),name="")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
    scale_y_continuous(limits=c(0,.24),breaks=seq(0,.24,.01))+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
 
 
 plot(MetroSplit)
@@ -93,21 +117,17 @@ svg("Plots/LeadStateSplit.svg",width=8)
 plot(StateSplit)
 dev.off()
 
-p1<-qplot(as.Date(paste(year,month,"01",sep="-")),average,data=LeadSummary, geom=c("line","point"),xlab="Year",
-         ylab=bquote("Lead Concentration (μg/"~m^3~") Standard"), main="Yearly Trend in Georgia Lead")
-plot(p1)
-
-p2<-p1+geom_abline(intercept=.15,slope=0,linetype="dotdash")+
+SmoothPlot<-ggplot(LeadSummary,aes(x=as.Date(paste(year,month,"01",sep="-")),y=average))+
+   geom_line(lwd=1.2)+geom_point(size=2.75)+ggtitle("Yearly Trend in Georgia Lead")+xlab("Year")+
+   ylab(bquote("Lead Concentration (μg/"~m^3~") Standard"))+AllMyOpts+
+   geom_abline(intercept=.15,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,.24),breaks=seq(0,.24,.01))+
-   theme(panel.background=element_rect(fill="white"))+
-   theme(panel.grid.major=element_line(colour="grey85"))
-plot(p2)
-
-p3<-p2+geom_smooth(aes(ymin=perc10,ymax=perc90),data=LeadSummary,stat="identity",fill="orange")
-plot(p3)
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=LeadSummary,stat="identity",fill="orange")
+   
+plot(SmoothPlot)
 
 svg("Plots/LeadSmooth.svg",width=8)
-plot(p3)
+plot(SmoothPlot)
 dev.off()
 
 

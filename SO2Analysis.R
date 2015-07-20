@@ -35,6 +35,7 @@ SO2Standard$year<-as.Date(paste(SO2Standard$year,"01","01",sep="-"))
 # Plots -------------------------------------------------------------------
 cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
 family="Ariel"
+legendrows=1
 AllMyOpts<-theme(plot.title=element_text(family=family,face="bold",size=20),
                  legend.title=element_text(family=family,face="bold",size=15),
                  legend.text=element_text(family=family,face="plain",size=12),
@@ -52,7 +53,8 @@ FullPlot<-ggplot(SO2Standard,aes(x=year,y=standard,col=Common.Name,linetype=Comm
    scale_color_manual(values=c(cbbPalette,cbbPalette,cbbPalette,cbbPalette),name="Common Name")+
    geom_abline(intercept=75,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,120),breaks=seq(0,120,10))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
    
 
 plot(FullPlot)
