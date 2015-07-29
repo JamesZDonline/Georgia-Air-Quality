@@ -39,6 +39,7 @@ O3<-O3[-which(O3$Common.Name=="Georgia DOT-Fayetteville"),]
 O3$year<-factor(O3$year)
 O3$month<-factor(O3$month)
 
+O3<-droplevels(O3)
 # Analysis ----------------------------------------------------------------
 
 #In order to examine trends, the EPA tracks the 
@@ -69,94 +70,74 @@ AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE
 O3Standard$year<-as.Date(paste(O3Standard$year,"01","01",sep="-"))
 # Plots -------------------------------------------------------------------
 cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
-family="Ariel"
+family="Arial"
 legendrows=4
 yaxisLimits=c(.05,.14)
-AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
-                       legend.title=element_text(family=family,face="bold"),
-                       legend.text=element_text(family=family,face="plain"),
-                       axis.text=element_text(family=family,face="plain",colour="black"),
-                       axis.title=(element_text(family=family,face="bold",colour="black")),
-                       axis.title.y=(element_text(vjust = .75)),
-                       legend.position="bottom",
-                       panel.background=element_rect(fill="white"),
-                       panel.grid.major=element_line(colour="grey85"))
 
-FullPlot<-ggplot(O3Standard,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+
-   geom_point(size=2.75)+ggtitle("8-Hour Ozone Annual Trend")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
-   scale_linetype_manual(values=c(rep("solid",8),rep("dashed",8),rep("dotted",7)),name="")+
-   scale_color_manual(values=c(cbbPalette,cbbPalette[1:8],cbbPalette[1:7]),name="")+
-   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
-   scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
-   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
-   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
-   
-
-plot(FullPlot)
-
-Metro<-O3Standard[O3Standard$MetroAtlanta=="Metro-Atlanta",]
-State<-O3Standard[O3Standard$MetroAtlanta=="State",]
-
-# SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
-#                   ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Metro-Atlanta Ozone")+geom_abline(intercept=35,slope=0,linetype="dotdash")+
-#    scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+# FullPlot<-ggplot(O3Standard,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+
+#    geom_point(size=2.75)+ggtitle("8-Hour Ozone Annual Trend")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
+#    scale_linetype_manual(values=c(rep("solid",8),rep("dashed",8),rep("dotted",7)),name="")+
+#    scale_color_manual(values=c(cbbPalette,cbbPalette[1:8],cbbPalette[1:7]),name="")+
+#    scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+#    scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
 #    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-#    theme(panel.background=element_rect(fill="white"))+
-#    theme(panel.grid.major=element_line(colour="grey85"))+
-#    stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+#    stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+#    guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
+#    
+# 
+# plot(FullPlot)
 
-SplitMetro<-ggplot(Metro,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
-   ggtitle("8-Hour Ozone Annual Trend (Metro-Atlanta)")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
-   scale_linetype_manual(values=c(rep("solid",6),rep("dashed",6)),name="")+
-   scale_color_manual(values=c(cbbPalette,cbbPalette[1:4]),name="")+
-   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
-   scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
-   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
-   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
+# Metro<-O3Standard[O3Standard$MetroAtlanta=="Metro-Atlanta",]
+# State<-O3Standard[O3Standard$MetroAtlanta=="State",]
+# 
+# # SplitMetro<-qplot(as.Date(paste(year,"01","01",sep="-")),standard,data=Metro, color=Common.Name,geom=c("line","point"),xlab="Year",
+# #                   ylab="Ozone concentration (ppm) Standard", main="Yearly Trend in Metro-Atlanta Ozone")+geom_abline(intercept=35,slope=0,linetype="dotdash")+
+# #    scale_y_continuous(limits=c(.00,.15),breaks=seq(.0,.15,.01))+
+# #    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+# #    theme(panel.background=element_rect(fill="white"))+
+# #    theme(panel.grid.major=element_line(colour="grey85"))+
+# #    stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+# 
+# SplitMetro<-ggplot(Metro,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
+#    ggtitle("8-Hour Ozone Annual Trend (Metro-Atlanta)")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
+#    scale_linetype_manual(values=c(rep("solid",6),rep("dashed",6)),name="")+
+#    scale_color_manual(values=c(cbbPalette,cbbPalette[1:4]),name="")+
+#    scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+#    scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
+#    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+#    stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+#    guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
+# 
+# plot(SplitMetro)
+# 
+# SplitState<-ggplot(State,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
+#    ggtitle("8-Hour Ozone Annual Trend (Non-Metro-Atlanta)")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
+#    scale_linetype_manual(values=c(rep("solid",6),rep("dashed",5)),name="")+
+#    scale_color_manual(values=c(cbbPalette,cbbPalette),name="")+
+#    scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+#    scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
+#    geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
+#    stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
+#    guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
+# 
+# plot(SplitState)
+# 
+# jpeg("Plots/O3FullPlot.jpg",width=1600,height=1600)
+# plot(FullPlot)
+# dev.off()
+# 
+# svg("Plots/O3FullPlot.svg",width=8, height=8)
+# plot(FullPlot)
+# dev.off()
+# 
+# svg("Plots/O3MetroPlot.svg",width=8, height=8)
+# plot(SplitMetro)
+# dev.off()
+# 
+# svg("Plots/O3StatePlot.svg",width=8, height=8)
+# plot(SplitState)
+# dev.off()
 
-plot(SplitMetro)
-
-SplitState<-ggplot(State,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
-   ggtitle("8-Hour Ozone Annual Trend (Non-Metro-Atlanta)")+xlab("Year")+ylab("Ozone concentration (ppm) 8-Hour Standard")+AllMyOpts+
-   scale_linetype_manual(values=c(rep("solid",6),rep("dashed",5)),name="")+
-   scale_color_manual(values=c(cbbPalette,cbbPalette),name="")+
-   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
-   scale_y_continuous(limits=yaxisLimits,breaks=seq(.0,.15,.01))+
-   geom_abline(intercept=.075,slope=0,linetype="dotdash",size=1)+
-   stat_summary(fun.y=mean,color="black",geom="line",size=2,linetype="dashed")+
-   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
-
-plot(SplitState)
-
-jpeg("Plots/O3FullPlot.jpg",width=1600,height=1600)
-plot(FullPlot)
-dev.off()
-
-svg("Plots/O3FullPlot.svg",width=8, height=8)
-plot(FullPlot)
-dev.off()
-
-svg("Plots/O3MetroPlot.svg",width=8, height=8)
-plot(SplitMetro)
-dev.off()
-
-svg("Plots/O3StatePlot.svg",width=8, height=8)
-plot(SplitState)
-dev.off()
-
-SmoothPlot<-qplot(as.Date(year,format="%Y"),avg,data=AverageStandard, geom=c("line","point"),xlab="Year",
-    ylab="Yearly Mean of Daily Max Ozone concentration (ppm)", main="Yearly Trend in Georgia Ozone")+AllMyOpts+
-   scale_y_continuous(limits=c(0,.15),breaks=seq(.0,.15,.01))+
-   geom_abline(intercept=.075,slope=0,linetype="dotdash")+
-   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity",fill="orange")
-
-plot(SmoothPlot)
-
-svg("Plots/O3Smooth.svg",width=8, height=8)
-plot(SmoothPlot)
-dev.off()
 
 startYear=min(O3Standard$year)
 endYear=max(O3Standard$year)
@@ -170,6 +151,83 @@ O3PercChange<-data.frame((O3StandAvg[which(O3StandAvg$year==startYear),2:4]-O3St
 O3PercChange$Pollutant<-"Ozone"
 O3PercChange$startYear=startYear
 O3PercChange$endYear=endYear
+
+
+AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
+                 legend.title=element_text(family=family,face="bold"),
+                 legend.text=element_text(family=family,face="plain"),
+                 axis.text=element_text(family=family,face="plain",colour="black"),
+                 axis.title=(element_text(family=family,face="bold",colour="black")),
+                 axis.title.y=(element_text(vjust = .75)),
+                 legend.position="bottom",
+                 panel.background=element_rect(fill="white"),
+                 panel.grid.major=element_line(colour="grey85"))
+
+
+
+xlabel<-paste("Year 2005-2014: ",as.character(100*round(O3PercChange$Full,digits = 2)),"% decrease",sep="")
+
+SmoothPlot<-ggplot(AverageStandard,aes(x=as.Date(paste(year,"01","01",sep="-")),y=avg))+geom_line(lwd=1.2)+geom_point(size=2.75)+AllMyOpts+
+   xlab(xlabel)+ylab("Concentration (ppm)")+ggtitle("State of Georgia Annual Trend: Ozone")+
+   scale_y_continuous(limits=c(0,.15),breaks=seq(.0,.15,.02))+
+   geom_abline(intercept=.075,slope=0,linetype="dotdash")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStandard,stat="identity",fill="orange",colour="black")+
+   annotate("text",x=as.Date("2013-01-01"),y=.1425,label=paste(as.character(length(levels(O3$Site.ID))),"sites"),family=family,size=3)+
+   annotate("text",x=as.Date("2007-01-15"),y=.072,label="Current National Standard",family=family,size=3)
+
+plot(SmoothPlot)
+
+tiff("Plots/O3Smooth.tiff",width=5.5, height=4,units="in",res=300,family=family,pointsize=9)
+plot(SmoothPlot)
+dev.off()
+
+
+xlabelMetro<-paste("Year 2005-2014: ",as.character(100*round(O3PercChange$Metroaverage,digits = 2)),"% decrease",sep="")
+
+Metro<-O3Standard[O3Standard$MetroAtlanta=="Metro-Atlanta",]
+AverageMetroStandard<-ddply(Metro,.(year),summarize,avg=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
+                       perc90=quantile(standard,probs=.9,na.rm=TRUE))
+
+State<-O3Standard[O3Standard$MetroAtlanta=="State",]
+AverageStateStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
+                       perc90=quantile(standard,probs=.9,na.rm=TRUE))
+
+
+SmoothMetro<-ggplot(AverageMetroStandard,aes(x=as.Date(paste(year,"01","01",sep="-")),y=avg))+geom_line(lwd=1.2)+geom_point(size=2.75)+AllMyOpts+
+   ggtitle("Metro-Atlanta Annual Trend: Ozone")+xlab(xlabelMetro)+ylab("Concentration (ppm)")+
+   scale_y_continuous(limits=c(0,.15),breaks=seq(.0,.15,.02))+
+   geom_abline(intercept=.075,slope=0,linetype="dotdash")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageMetroStandard,stat="identity",fill="orange",colour="black")+
+   annotate("text",x=as.Date("2013-01-01"),y=.1425,label=paste(as.character(length(levels(droplevels(O3$Site.ID[O3$MetroAtlanta!="State"])))),"sites"),family=family,size=3)+
+   annotate("text",x=as.Date("2007-01-15"),y=.072,label="Current National Standard",family=family,size=3)
+
+
+
+
+plot(SmoothMetro)
+
+tiff("Plots/O3SmoothMetro.tiff",width=5.5, height=4,units="in",res=300,family=family,pointsize=9)
+plot(SmoothMetro)
+dev.off()
+
+xlabelState<-paste("Year 2005-2014: ",as.character(100*round(O3PercChange$Stateaverage,digits = 2)),"% decrease",sep="")
+
+SmoothState<-ggplot(AverageStateStandard,aes(x=as.Date(paste(year,"01","01",sep="-")),y=avg))+geom_line(lwd=1.2)+geom_point(size=2.75)+AllMyOpts+
+   ggtitle("Non-Metro-Atlanta Annual Trend: Ozone")+xlab(xlabelState)+ylab("Concentration (ppm)")+
+   scale_y_continuous(limits=c(0,.15),breaks=seq(.0,.15,.02))+
+   geom_abline(intercept=.075,slope=0,linetype="dotdash")+
+   scale_x_date(breaks=date_breaks(width="1 year"),labels=date_format("%Y"))+
+   geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageStateStandard,stat="identity",fill="orange",colour="black")+
+   annotate("text",x=as.Date("2013-01-01"),y=.1425,label=paste(as.character(length(levels(droplevels(O3$Site.ID[O3$MetroAtlanta=="State"])))),"sites"),family=family,size=3)+
+   annotate("text",x=as.Date("2007-01-15"),y=.072,label="Current National Standard",family=family,size=3)
+
+plot(SmoothState)
+
+tiff("Plots/O3SmoothState.tiff",width=5.5, height=4,units="in",res=300,family=family,pointsize=9)
+plot(SmoothState)
+dev.off()
 
 write.table(O3PercChange,file="PercentChange/percentchange.csv",sep=",",row.names=F)
 
