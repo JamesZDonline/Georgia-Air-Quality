@@ -28,15 +28,19 @@ NO2Standard$year<-as.Date(paste(NO2Standard$year,"01","01",sep="-"))
 NO2<-droplevels(NO2)
 # Create Plots ------------------------------------------------------------
 cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+
 family="Arial"
+
 AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
                  legend.title=element_text(family=family,face="bold"),
                  legend.text=element_text(family=family,face="plain"),
                  axis.text=element_text(family=family,face="plain",colour="black"),
                  axis.title=(element_text(family=family,face="bold",colour="black")),
                  axis.title.y=(element_text(vjust = .75)),
+                 legend.position="bottom",
                  panel.background=element_rect(fill="white"),
                  panel.grid.major=element_line(colour="grey85"))
+
 
 # FullPlot<-ggplot(NO2Standard,aes(x=year,y=standard,col=Common.Name))+geom_line(lwd=1.2)+geom_point(size=2.75)+
 #    ggtitle("Yearly Trend in Georgia NO2")+xlab("Year")+ylab("NO2 Concentration (ppb) Standard")+AllMyOpts+
@@ -52,6 +56,7 @@ AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
 # 
 # 
 # 
+
 NO2Summary<-ddply(NO2Standard,.(year),summarize,average=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
                     perc90=quantile(standard,probs=.9,na.rm=TRUE))
 # 

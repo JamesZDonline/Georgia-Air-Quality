@@ -70,8 +70,11 @@ AverageStandard<-ddply(O3Standard,.(year),summarize,avg=mean(standard,na.rm=TRUE
 O3Standard$year<-as.Date(paste(O3Standard$year,"01","01",sep="-"))
 # Plots -------------------------------------------------------------------
 cbbPalette<-c("#999999","#E69F00","#56B4E9","#009E73","#F0E442","#0072B2","#D55E00","#CC79A7")
+
 family="Arial"
 legendrows=4
+
+
 yaxisLimits=c(.05,.14)
 
 # FullPlot<-ggplot(O3Standard,aes(x=year,y=standard,col=Common.Name,linetype=Common.Name))+geom_line(lwd=1.2)+
@@ -154,6 +157,7 @@ O3PercChange$endYear=endYear
 
 
 AllMyOpts<-theme(plot.title=element_text(family=family,face="bold"),
+
                  legend.title=element_text(family=family,face="bold"),
                  legend.text=element_text(family=family,face="plain"),
                  axis.text=element_text(family=family,face="plain",colour="black"),
@@ -185,6 +189,10 @@ dev.off()
 
 xlabelMetro<-paste("Year 2005-2014: ",as.character(100*round(O3PercChange$Metroaverage,digits = 2)),"% decrease",sep="")
 
+svg("Plots/O3FullPlot.svg",width=6.5, height=6)
+plot(FullPlot)
+dev.off()
+
 Metro<-O3Standard[O3Standard$MetroAtlanta=="Metro-Atlanta",]
 AverageMetroStandard<-ddply(Metro,.(year),summarize,avg=mean(standard,na.rm=TRUE),perc10=quantile(standard,probs=.1,na.rm=TRUE),
                        perc90=quantile(standard,probs=.9,na.rm=TRUE))
@@ -202,6 +210,8 @@ SmoothMetro<-ggplot(AverageMetroStandard,aes(x=as.Date(paste(year,"01","01",sep=
    geom_smooth(aes(ymin=perc10,ymax=perc90),data=AverageMetroStandard,stat="identity",fill="orange",colour="black")+
    annotate("text",x=as.Date("2013-01-01"),y=.1425,label=paste(as.character(length(levels(droplevels(O3$Site.ID[O3$MetroAtlanta!="State"])))),"sites"),family=family,size=3)+
    annotate("text",x=as.Date("2007-01-15"),y=.072,label="Current National Standard",family=family,size=3)
+
+
 
 
 
@@ -227,6 +237,7 @@ plot(SmoothState)
 
 tiff("Plots/O3SmoothState.tiff",width=5.5, height=4,units="in",res=300,family=family,pointsize=9)
 plot(SmoothState)
+
 dev.off()
 
 write.table(O3PercChange,file="PercentChange/percentchange.csv",sep=",",row.names=F)

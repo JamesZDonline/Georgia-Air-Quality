@@ -60,7 +60,8 @@ FullPlot<-ggplot(SO2Standard,aes(x=year,y=standard,col=Common.Name,linetype=Comm
    scale_color_manual(values=c(cbbPalette,cbbPalette,cbbPalette,cbbPalette),name="Common Name")+
    geom_abline(intercept=75,slope=0,linetype="dotdash")+
    scale_y_continuous(limits=c(0,120),breaks=seq(0,120,10))+
-   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")
+   stat_summary(fun.y=mean,color="black",geom="line",size=1.5,linetype="dashed")+
+   guides(colour=guide_legend(nrow=legendrows),linetype=guide_legend(nrow=legendrows))
    
 
 plot(FullPlot)
